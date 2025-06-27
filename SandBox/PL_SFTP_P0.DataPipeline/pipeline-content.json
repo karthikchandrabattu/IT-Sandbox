@@ -1,0 +1,187 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "GetMetadata",
+        "typeProperties": {
+          "datasetSettings": {
+            "type": "DelimitedText",
+            "typeProperties": {
+              "location": {
+                "type": "SftpLocation",
+                "folderPath": {
+                  "value": "@concat(pipeline().parameters.FolderPath,'/',pipeline().parameters.FolderName)",
+                  "type": "Expression"
+                }
+              },
+              "columnDelimiter": ",",
+              "quoteChar": "\"",
+              "escapeChar": "\\",
+              "firstRowAsHeader": true
+            },
+            "schema": [],
+            "externalReferences": {
+              "connection": "901e30eb-62e2-4053-b9dc-779c0e2a792e"
+            },
+            "annotations": []
+          },
+          "fieldList": [
+            "childItems"
+          ],
+          "storeSettings": {
+            "type": "SftpReadSettings",
+            "disableChunking": false,
+            "recursive": true,
+            "enablePartitionDiscovery": false
+          },
+          "formatSettings": {
+            "type": "DelimitedTextReadSettings"
+          }
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Get Metadata of each file",
+        "dependsOn": []
+      },
+      {
+        "type": "ForEach",
+        "typeProperties": {
+          "isSequential": false,
+          "batchCount": 5,
+          "items": {
+            "value": "@activity('Get Metadata of each file').output.childItems",
+            "type": "Expression"
+          },
+          "activities": [
+            {
+              "type": "InvokePipeline",
+              "typeProperties": {
+                "parameters": {
+                  "FolderPath": "/files/findchips",
+                  "FileName": {
+                    "value": "@item().name",
+                    "type": "Expression"
+                  },
+                  "FolderName": {
+                    "value": "@pipeline().parameters.FolderName",
+                    "type": "Expression"
+                  },
+                  "BatchID": 6
+                },
+                "waitOnCompletion": true,
+                "workspaceId": "00000000-0000-0000-0000-000000000000",
+                "pipelineId": "c1dbf040-c165-be15-45ac-2d6128954967",
+                "operationType": "InvokeFabricPipeline"
+              },
+              "externalReferences": {
+                "connection": "4b12a476-1377-44b3-ba53-76fda8046414"
+              },
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureInput": false,
+                "secureOutput": false
+              },
+              "name": "Invoke Child Pl",
+              "dependsOn": []
+            }
+          ]
+        },
+        "name": "Process each files from folder",
+        "dependsOn": [
+          {
+            "activity": "Get Metadata of each file",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Copy",
+        "typeProperties": {
+          "source": {
+            "type": "CopySource"
+          },
+          "enableStaging": false
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Copy data1",
+        "state": "Inactive",
+        "onInactiveMarkAs": "Succeeded",
+        "dependsOn": []
+      },
+      {
+        "type": "Copy",
+        "typeProperties": {
+          "source": {
+            "type": "CopySource"
+          },
+          "enableStaging": false
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Copy data2",
+        "state": "Inactive",
+        "onInactiveMarkAs": "Succeeded",
+        "dependsOn": []
+      }
+    ],
+    "parameters": {
+      "FolderPath": {
+        "type": "string",
+        "defaultValue": "/files/findchips"
+      },
+      "FileName": {
+        "type": "string"
+      },
+      "FolderName": {
+        "type": "string",
+        "defaultValue": "20-05-2025"
+      },
+      "BatchID": {
+        "type": "int",
+        "defaultValue": 2
+      }
+    },
+    "variables": {
+      "varIsSuccess": {
+        "type": "String",
+        "defaultValue": "Yes"
+      },
+      "varSuccess": {
+        "type": "String",
+        "defaultValue": "No"
+      },
+      "WaitTime": {
+        "type": "Integer",
+        "defaultValue": 30
+      },
+      "TempWaitTime": {
+        "type": "Integer",
+        "defaultValue": 30
+      },
+      "LogID": {
+        "type": "Integer",
+        "defaultValue": 1
+      }
+    }
+  }
+}

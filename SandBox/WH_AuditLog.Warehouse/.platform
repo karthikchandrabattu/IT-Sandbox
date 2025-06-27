@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Warehouse",
+    "displayName": "WH_AuditLog"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "23eb9df4-051a-b007-4d99-29600a8aa623"
+  }
+}

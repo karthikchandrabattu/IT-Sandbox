@@ -1,0 +1,331 @@
+{
+  "properties": {
+    "activities": [
+      {
+        "type": "Copy",
+        "typeProperties": {
+          "source": {
+            "type": "DelimitedTextSource",
+            "formatSettings": {
+              "type": "DelimitedTextReadSettings"
+            },
+            "storeSettings": {
+              "type": "SftpReadSettings",
+              "disableChunking": false,
+              "recursive": true,
+              "enablePartitionDiscovery": false
+            },
+            "datasetSettings": {
+              "type": "DelimitedText",
+              "typeProperties": {
+                "location": {
+                  "type": "SftpLocation",
+                  "folderPath": {
+                    "value": "@concat(pipeline().parameters.FolderPath,'/',pipeline().parameters.FolderName)",
+                    "type": "Expression"
+                  },
+                  "fileName": {
+                    "value": "@pipeline().parameters.FileName",
+                    "type": "Expression"
+                  }
+                },
+                "columnDelimiter": ",",
+                "encodingName": "UTF-8",
+                "quoteChar": "\"",
+                "escapeChar": "\"",
+                "firstRowAsHeader": true
+              },
+              "schema": [],
+              "externalReferences": {
+                "connection": "901e30eb-62e2-4053-b9dc-779c0e2a792e"
+              },
+              "annotations": []
+            }
+          },
+          "sink": {
+            "type": "DelimitedTextSink",
+            "formatSettings": {
+              "type": "DelimitedTextWriteSettings",
+              "fileExtension": ".txt"
+            },
+            "storeSettings": {
+              "type": "LakehouseWriteSettings"
+            },
+            "datasetSettings": {
+              "type": "DelimitedText",
+              "typeProperties": {
+                "location": {
+                  "type": "LakehouseLocation",
+                  "folderPath": {
+                    "value": "@concat('Pricing/',pipeline().parameters.FolderName)",
+                    "type": "Expression"
+                  },
+                  "fileName": {
+                    "value": "@pipeline().parameters.FileName",
+                    "type": "Expression"
+                  }
+                },
+                "columnDelimiter": ",",
+                "encodingName": "UTF-8",
+                "quoteChar": "\"",
+                "escapeChar": "\"",
+                "firstRowAsHeader": true
+              },
+              "schema": [],
+              "linkedService": {
+                "name": "LH_SFTP",
+                "properties": {
+                  "type": "Lakehouse",
+                  "typeProperties": {
+                    "artifactId": "a7eff876-93fc-8e50-4c36-9bf4929ea9e5",
+                    "workspaceId": "00000000-0000-0000-0000-000000000000",
+                    "rootFolder": "Files"
+                  },
+                  "annotations": []
+                }
+              },
+              "annotations": []
+            }
+          },
+          "translator": {
+            "type": "TabularTranslator",
+            "typeConversion": true,
+            "typeConversionSettings": {
+              "allowDataTruncation": true,
+              "treatBooleanAsNumber": false
+            }
+          },
+          "enableStaging": false,
+          "enableSkipIncompatibleRow": true
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 5,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "CopyDataFromSFTPtoBronze_copy1",
+        "dependsOn": []
+      },
+      {
+        "type": "Copy",
+        "typeProperties": {
+          "source": {
+            "type": "DelimitedTextSource",
+            "formatSettings": {
+              "type": "DelimitedTextReadSettings"
+            },
+            "storeSettings": {
+              "type": "LakehouseReadSettings",
+              "recursive": false,
+              "enablePartitionDiscovery": false
+            },
+            "datasetSettings": {
+              "type": "DelimitedText",
+              "typeProperties": {
+                "location": {
+                  "type": "LakehouseLocation",
+                  "folderPath": {
+                    "value": "@concat('Pricing/',pipeline().parameters.FolderName)",
+                    "type": "Expression"
+                  },
+                  "fileName": {
+                    "value": "@pipeline().parameters.FileName",
+                    "type": "Expression"
+                  }
+                },
+                "columnDelimiter": ",",
+                "encodingName": "UTF-8",
+                "quoteChar": "\"",
+                "escapeChar": "\"",
+                "firstRowAsHeader": true
+              },
+              "schema": [],
+              "linkedService": {
+                "name": "LH_SFTP",
+                "properties": {
+                  "type": "Lakehouse",
+                  "typeProperties": {
+                    "artifactId": "a7eff876-93fc-8e50-4c36-9bf4929ea9e5",
+                    "workspaceId": "00000000-0000-0000-0000-000000000000",
+                    "rootFolder": "Files"
+                  },
+                  "annotations": []
+                }
+              },
+              "annotations": []
+            }
+          },
+          "sink": {
+            "type": "DataWarehouseSink",
+            "tableOption": "autoCreate",
+            "allowCopyCommand": true,
+            "copyCommandSettings": {},
+            "datasetSettings": {
+              "type": "DataWarehouseTable",
+              "typeProperties": {
+                "schema": "scrape",
+                "table": "@pipeline().parameters.FileName"
+              },
+              "schema": [],
+              "linkedService": {
+                "name": "WH_AuditLog",
+                "properties": {
+                  "type": "DataWarehouse",
+                  "typeProperties": {
+                    "artifactId": "0a8aa623-2960-4d99-b007-051a23eb9df4",
+                    "endpoint": "dfm4t2vou6wu3g3hioav63of4e-dqogjogzmslurlv4y36e2g7qhm.datawarehouse.fabric.microsoft.com",
+                    "workspaceId": "b8641c1c-64d9-4897-aebc-c6fc4d1bf03b"
+                  },
+                  "annotations": []
+                }
+              },
+              "annotations": []
+            }
+          },
+          "translator": {
+            "type": "TabularTranslator",
+            "typeConversion": true,
+            "typeConversionSettings": {
+              "allowDataTruncation": true,
+              "treatBooleanAsNumber": false
+            }
+          },
+          "enableStaging": true
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 5,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "CopyDataBronzeAsTables_copy1",
+        "dependsOn": [
+          {
+            "activity": "CopyDataFromSFTPtoBronze_copy1",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Copy",
+        "typeProperties": {
+          "source": {
+            "type": "DataWarehouseSource",
+            "partitionOption": "None",
+            "queryTimeout": "02:00:00",
+            "datasetSettings": {
+              "type": "DataWarehouseTable",
+              "typeProperties": {
+                "schema": "scrape",
+                "table": {
+                  "value": "@pipeline().parameters.FileName",
+                  "type": "Expression"
+                }
+              },
+              "schema": [],
+              "linkedService": {
+                "name": "WH_AuditLog",
+                "properties": {
+                  "type": "DataWarehouse",
+                  "typeProperties": {
+                    "artifactId": "0a8aa623-2960-4d99-b007-051a23eb9df4",
+                    "endpoint": "dfm4t2vou6wu3g3hioav63of4e-dqogjogzmslurlv4y36e2g7qhm.datawarehouse.fabric.microsoft.com",
+                    "workspaceId": "b8641c1c-64d9-4897-aebc-c6fc4d1bf03b"
+                  },
+                  "annotations": []
+                }
+              },
+              "annotations": []
+            }
+          },
+          "sink": {
+            "type": "SqlServerSink",
+            "tableOption": "autoCreate",
+            "sqlWriterUseTableLock": false,
+            "writeBehavior": "insert",
+            "datasetSettings": {
+              "type": "SqlServerTable",
+              "typeProperties": {
+                "schema": "scrape",
+                "table": "@pipeline().parameters.FileName",
+                "database": "Fabric_Test"
+              },
+              "schema": [],
+              "externalReferences": {
+                "connection": "ad89580d-76ac-4b8e-afb0-8334c9b4c81f"
+              },
+              "annotations": []
+            }
+          },
+          "translator": {
+            "type": "TabularTranslator",
+            "typeConversion": true,
+            "typeConversionSettings": {
+              "allowDataTruncation": true,
+              "treatBooleanAsNumber": false
+            }
+          },
+          "enableStaging": false
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 5,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Copy Data to SQL Warehouse_copy1",
+        "dependsOn": [
+          {
+            "activity": "CopyDataBronzeAsTables_copy1",
+            "dependencyConditions": [
+              "Completed"
+            ]
+          }
+        ]
+      }
+    ],
+    "parameters": {
+      "FolderPath": {
+        "type": "string",
+        "defaultValue": "/files/findchips"
+      },
+      "FileName": {
+        "type": "string"
+      },
+      "FolderName": {
+        "type": "string"
+      },
+      "BatchID": {
+        "type": "int"
+      }
+    },
+    "variables": {
+      "varIsSuccess": {
+        "type": "String",
+        "defaultValue": "Yes"
+      },
+      "varSuccess": {
+        "type": "String",
+        "defaultValue": "No"
+      },
+      "WaitTime": {
+        "type": "Integer",
+        "defaultValue": 30
+      },
+      "TempWaitTime": {
+        "type": "Integer",
+        "defaultValue": 30
+      },
+      "LogID": {
+        "type": "Integer",
+        "defaultValue": 1
+      }
+    }
+  }
+}
