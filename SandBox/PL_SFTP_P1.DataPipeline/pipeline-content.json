@@ -166,7 +166,10 @@
               "type": "DataWarehouseTable",
               "typeProperties": {
                 "schema": "scrape",
-                "table": "@pipeline().parameters.FileName"
+                "table": {
+                  "value": "@pipeline().parameters.FileName",
+                  "type": "Expression"
+                }
               },
               "schema": [],
               "linkedService": {
@@ -252,7 +255,10 @@
               "type": "SqlServerTable",
               "typeProperties": {
                 "schema": "scrape",
-                "table": "@pipeline().parameters.FileName",
+                "table": {
+                  "value": "@pipeline().parameters.FileName",
+                  "type": "Expression"
+                },
                 "database": "Fabric_Test"
               },
               "schema": [],
@@ -288,6 +294,26 @@
             ]
           }
         ]
+      },
+      {
+        "type": "Copy",
+        "typeProperties": {
+          "source": {
+            "type": "CopySource"
+          },
+          "enableStaging": false
+        },
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureInput": false,
+          "secureOutput": false
+        },
+        "name": "Copy data1",
+        "state": "Inactive",
+        "onInactiveMarkAs": "Succeeded",
+        "dependsOn": []
       }
     ],
     "parameters": {
